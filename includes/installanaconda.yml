@@ -1,0 +1,17 @@
+  - name: Check if Anaconda is installed
+    stat:
+      path: /usr/local/anaconda3/bin/python
+    register: anaconda_is_installed
+  - name: Install Packages for Anaconda
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - bzip2
+  - name: Install Anaconda
+    shell: |
+      wget -P /tmp https://repo.anaconda.com/archive/Anaconda3-2019.10-Linux-x86_64.sh
+      bash /tmp/Anaconda3-2019.10-Linux-x86_64.sh -b -u -p /usr/local/anaconda3
+      chown -R ubuntu:ubuntu /usr/local/anaconda3
+    sudo: yes
+    when: anaconda_is_installed.stat.exists == False

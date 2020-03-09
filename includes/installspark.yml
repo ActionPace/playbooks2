@@ -1,0 +1,12 @@
+  - name: Check if Spark is installed
+    stat:
+      path: /opt/spark-{{ spark_version }}-bin-hadoop2.7/bin/spark-shell
+    register: spark_is_installed
+  - name: Install Spark
+    shell: |
+      wget -P /tmp https://archive.apache.org/dist/spark/spark-{{ spark_version }}/spark-{{ spark_version }}-bin-hadoop2.7.tgz
+      tar -zxf /tmp/spark-{{ spark_version }}-bin-hadoop2.7.tgz -C /tmp
+      mv /tmp/spark-{{ spark_version }}-bin-hadoop2.7 /opt
+      ln -s /opt/spark-{{ spark_version }}-bin-hadoop2.7 /opt/spark
+    sudo: yes
+    when: spark_is_installed.stat.exists == False

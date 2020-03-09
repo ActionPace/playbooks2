@@ -1,0 +1,8 @@
+  - name: Ansible Insert multiple lines using blockinfile
+    blockinfile:
+      dest: /etc/hosts
+      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item }}"
+      block: |
+        {{ servers[item]['private_ip'] }} {{ item }}
+    with_items: 
+      - "{{ play_hosts }}"

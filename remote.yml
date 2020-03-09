@@ -1,0 +1,94 @@
+- hosts: all
+  tasks:
+  - name: Update Ubuntu
+    shell: |
+      apt-get -y update
+      apt-get -y upgrade
+    sudo: yes
+#  - name: Check if Java is installed
+#    stat:
+#      path: /usr/bin/java
+#    register: java_is_installed
+  - name: Install Java Apt
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - openjdk-8-*
+  - name: Install Packages for Remote Access
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - x11-common
+      - xserver-common x11-utils
+      - libfontenc1
+      - libgl1-mesa-dri
+      - libjpeg-turbo8
+      - libpixman-1-0
+      - libtasn1-3-bin
+      - libxfont1
+      - libxtst6
+      - libglu1-mesa 
+
+
+  - name: Check if Tiger Vnc Server is installed
+    stat:
+      path: /tmp/tigervncserver_1.8.0-1ubuntu1_amd64.deb
+    register: tigervnc_is_installed
+  - name: Install Tiger Vnc
+    shell: |
+      wget -P /tmp https://s3.amazonaws.com/machinelearningfiles/tigervncserver_1.8.0-1ubuntu1_amd64.deb
+      bash sudo dpkg -i /tmp/tigervncserver_1.8.0-1ubuntu1_amd64.deb
+    sudo: yes
+    when: tigervnc_is_installed.stat.exists == False
+
+
+  - name: Install Packages for Remote Access 2
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - autoconf 
+      - libtool 
+      - pkg-config 
+      - libssl-dev 
+      - libpam0g-dev 
+      - libfuse-dev 
+      - libmp3lame-dev 
+      - libpixman-1-dev 
+      - libxfixes-dev 
+      - libxrandr-dev nasm
+      - xserver-xorg-dev
+      - xfce4
+      - xfce4-goodies
+ 
+  - name: Check if Tiger xrdp is installed
+    stat:
+      path: /tmp/xrdp-0.9.6.tar.gz
+    register: xrdp_is_installed
+  - name: Install Xrdp
+    shell: |
+      wget -P /tmp wget https://github.com/neutrinolabs/xrdp/releases/download/v0.9.6/xrdp-0.9.6.tar.gz
+      tar -zxf /tmp/xrdp-0.9.6.tar.gz -C /tmp
+      bash -lc "cd /tmp/xrdp-0.9.6 && ./bootstrap"
+      bash -lc "cd /tmp/xrdp-0.9.6 && ./configure --enable-fuse --enable-mp3lame --enable-pixman"
+      bash -lc "cd /tmp/xrdp-0.9.6 && make"
+      bash -lc "cd /tmp/xrdp-0.9.6 && sudo make install"
+    sudo: yes
+    when: xrdp_is_installed.stat.exists == False
+
+  - name: Check if Xserver is installed
+    stat:
+      path: /tmp/xorgxrdp-0.2.6.tar.gz
+    register: xserver_is_installed
+  - name: Install Xserver
+    shell: |
+      wget -P /tmp https://github.com/neutrinolabs/xorgxrdp/releases/download/v0.2.6/xorgxrdp-0.2.6.tar.gz
+      tar -zxf /tmp/xorgxrdp-0.2.6.tar.gz -C /tmp
+      bash -lc "cd /tmp/xorgxrdp-0.2.6 && ./bootstrap"
+      bash -lc "cd /tmp/xorgxrdp-0.2.6 && ./configure"
+      bash -lc "cd /tmp/xorgxrdp-0.2.6 && make"
+      bash -lc "cd /tmp/xorgxrdp-0.2.6 && sudo make install"
+    sudo: yes
+    when: xserver_is_installed.stat.exists == False

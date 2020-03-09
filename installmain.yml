@@ -1,0 +1,24 @@
+- hosts: all
+#  remote_user: root
+  gather_facts: True
+  vars:
+      scala_version: 2.11.8
+      maven_version: 3.6.3
+      spark_version: 2.4.0
+  vars_files:
+    - ansiblevars2out.yml
+  tasks:
+  - name: Update Ubuntu
+    shell: |
+      apt-get -y update
+      apt-get -y upgrade
+    sudo: yes
+#  - include_tasks: includes/installjava.yml
+#  - include_tasks: includes/installscala.yml
+#  - include_tasks: includes/installmaven.yml
+#  - include_tasks: includes/installspark.yml
+#  - include_tasks: includes/updatebashrc.yml
+#  - include_tasks: includes/updatesparkenv.yml
+#  - include_tasks: includes/updatesparkdefaultsconf.yml
+  - include_tasks: includes/updateetchosts.yml
+  - include_tasks: includes/sshpasswordless.yml

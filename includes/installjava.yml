@@ -1,0 +1,10 @@
+  - name: Check if Java is installed
+    stat:
+      path: /usr/bin/java
+    register: java_is_installed
+  - name: Install Java Apt
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - openjdk-8-*

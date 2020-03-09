@@ -1,0 +1,312 @@
+- hosts: all
+  tasks:
+  - name: Update Ubuntu
+    shell: |
+      apt-get -y update 
+      apt-get -y upgrade
+    sudo: yes
+#  - name: Check if Java is installed
+#    stat:
+#      path: /usr/bin/java
+#    register: java_is_installed
+  - name: Install Java Apt
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - openjdk-8-*
+#  - name: Install Java 8
+#    shell: |
+#      apt-get -y install openjdk-8-*
+#    sudo: yes
+#    when: java_is_installed.stat.exists == False
+  - name: Check Scala Installed
+    shell: dpkg --status scala | grep 'install ok installed'
+    register: scala_is_installed
+    failed_when: no
+    changed_when: no
+  - name: Install Scala
+    shell: |
+      wget -P /tmp http://downloads.lightbend.com/scala/2.11.12/scala-2.11.12.deb
+      dpkg -i /tmp/scala-2.11.12.deb
+    when: scala_is_installed.rc == 1
+    sudo: yes
+  - name: Check if mvn is installed
+    stat:
+      path: /usr/local/apache-maven-3.5.4/bin/mvn
+    register: mvn_is_installed
+  - name: Install Maven
+    shell: |
+      wget -P /tmp http://www-us.apache.org/dist/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz
+      tar -zxf /tmp/apache-maven-3.5.4-bin.tar.gz -C /tmp
+      mv /tmp/apache-maven-3.5.4 /usr/local
+      ln -s /usr/local/apache-maven-3.5.4/bin/mvn /usr/bin/mvn
+    sudo: yes
+    when: mvn_is_installed.stat.exists == False
+  - name: Check if Spark is installed
+    stat:
+      path: /opt/spark-2.3.1-bin-hadoop2.7/bin/spark-shell
+    register: spark_is_installed
+  - name: Install Spark
+    shell: |
+      wget -P /tmp http://www-us.apache.org/dist/spark/spark-2.3.1/spark-2.3.1-bin-hadoop2.7.tgz
+      tar -zxf /tmp/spark-2.3.1-bin-hadoop2.7.tgz -C /tmp
+      mv /tmp/spark-2.3.1-bin-hadoop2.7 /opt
+      ln -s /opt/spark-2.3.1-bin-hadoop2.7 /opt/spark
+    sudo: yes
+    when: spark_is_installed.stat.exists == False
+  - name: Check if Anaconda is installed
+    stat:
+      path: /usr/local/anaconda3/bin/python
+    register: anaconda_is_installed
+  - name: Install Packages for Anaconda
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - bzip2
+  - name: Install Anaconda
+    shell: |
+      wget -P /tmp https://repo.anaconda.com/archive/Anaconda3-5.2.0-Linux-x86_64.sh
+      bash /tmp/Anaconda3-5.2.0-Linux-x86_64.sh -b -p /usr/local/anaconda3
+    sudo: yes
+    when: anaconda_is_installed.stat.exists == False
+  - name: Install Packages for Microsoft Open R
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - libgomp1
+      - libgfortran3
+      - libtcl8.6
+      - libtk8.6
+      - libquadmath0
+      - libxss1
+  - name: Check if Microsoft Open R is installed
+    stat:
+      path: /opt/microsoft/ropen/3.5.0/lib64/R/bin/R
+    register: r_is_installed
+  - name: Install Microsoft Open R
+    shell: |
+      wget -P /tmp https://mran.blob.core.windows.net/install/mro/3.5.0/microsoft-r-open-3.5.0.tar.gz
+      tar -zxf /tmp/microsoft-r-open-3.5.0.tar.gz -C /tmp
+      /tmp/microsoft-r-open/install.sh -a -u
+    sudo: yes
+    when: r_is_installed.stat.exists == False
+  - name: Install Packages for Microsoft Open R Compilations
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - make 
+      - gcc
+      - gfortran
+      - g++
+      - libcurl4-openssl-dev
+      - libxml2-dev
+      - libgsl2
+      - gsl-bin
+      - libgsl-dev
+      - libcairo2-dev
+      - libssl-dev
+  - name: Ansible Insert multiple lines using blockinfile
+    blockinfile:
+      dest: /etc/bash.bashrc
+      block: |
+        export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+        export PATH=$PATH:$JAVA_HOME/bin
+        export SCALA_HOME=/usr/share/scala
+        export PATH=$PATH:$SCALA_HOME/bin
+        export MAVEN_OPTS="-Xmx2g -XX:ReservedCodeCacheSize=512m"
+        export M2_HOME=/usr/local/apache-maven-3.5.4
+        export SPARK_HOME=/opt/spark-2.3.1-bin-hadoop2.7
+        export PYTHONPATH=$SPARK_HOME/python/:$SPARK_HOME/python/lib/py4j-0.10.7-src.zip
+        export PATH="/usr/local/anaconda3/bin:$PATH"
+        export SPARK_LOCAL_IP='127.0.0.1'
+      backup: yes
+  - name: Install Packages for Jupyter R Interface
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - python-pip
+      - libssl-dev 
+      - libzmq-dbg
+      - libzmq-dev
+      - libzmq1
+  - name: Install Jupyter with pip
+    shell: |
+      pip install jupyter
+    sudo: yes
+  - name: Install R Packages for Jupyter
+    shell: |
+      R -e "packages <- c('repr', 'IRdisplay', 'evaluate', 'crayon', 'pbdZMQ', 'devtools', 'uuid', 'digest');if (length(setdiff(packages, rownames(installed.packages()))) > 0) { install.packages(setdiff(packages, rownames(installed.packages())))  }"
+    sudo: yes
+  - name: Re-Install R Packages for Curl Issue
+    shell: |
+      R -e "remove.packages('curl');install.packages('curl')"
+    sudo: yes
+  - name: Install IRkernal R Package
+    shell: |
+      R -e "options(unzip = 'internal');devtools::install_github('IRkernel/IRkernel');IRkernel::installspec(user = FALSE)"
+    sudo: yes
+  - name: Install Docker Apt Prerequisites
+    apt:
+      name: "{{ packages }}"
+      install_recommends: no
+    vars:
+      packages:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+  - name: Install more Docker Prereqs
+    shell: |
+      curl -fsSL https://apt.dockerproject.org/gpg | apt-key add -
+      apt-key fingerprint 58118E89F3A912897C070ADBF76221572C52609D
+      add-apt-repository "deb https://apt.dockerproject.org/repo/ ubuntu-$(lsb_release -cs) main"
+    sudo: yes
+  - name: Install Docker
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - docker-engine
+  - name: Docker Hello World as root
+    shell: |
+      docker run hello-world
+    sudo: yes
+  - name: Add Docker Rights to Ubuntu User
+    shell: |
+      usermod -aG docker ubuntu
+    sudo: yes
+  - name: Docker Hello World as ubuntu user
+    shell: |
+      docker run hello-world
+    become: yes
+    become_user: ubuntu
+  - name: Check SBT Installed
+    shell: dpkg --status sbt | grep 'install ok installed'
+    register: sbt_is_installed
+    failed_when: no
+    changed_when: no
+  - name: Install SBT
+    shell: |
+      wget -O /tmp/sbt-1.1.6.deb "https://bintray.com/sbt/debian/download_file?file_path=sbt-1.1.6.deb"
+      dpkg -i /tmp/sbt-1.1.6.deb
+    when: sbt_is_installed.rc == 1
+    sudo: yes
+  - name: Install make for Toree
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - make
+  - name: Check if Toree Pip File is Installed
+    stat:
+      path: /usr/local/lib/python2.7/dist-packages/toree/lib/toree-assembly-0.2.0-incubating.jar
+    register: toree_is_installed
+  - name: Install Toree
+    shell: |
+      wget -P /tmp https://github.com/apache/incubator-toree/archive/v0.2.0-incubating-rc5.tar.gz 
+      tar -zxf /tmp/v0.2.0-incubating-rc5.tar.gz -C /tmp
+      bash -lc "cd /tmp/incubator-toree-0.2.0-incubating-rc5 && git init"
+      bash -lc "cd /tmp/incubator-toree-0.2.0-incubating-rc5 && make release"
+      bash -lc "cd /tmp/incubator-toree-0.2.0-incubating-rc5 && make release"
+      bash -lc "cd /tmp/incubator-toree-0.2.0-incubating-rc5 && make release"
+      pip install toree --no-index --find-links file:///tmp/incubator-toree-0.2.0-incubating-rc5/dist/toree-pip/toree-0.2.0.tar.gz
+      jupyter toree install --spark_opts='--master=local[1]' --spark_home=/opt/spark-2.3.1-bin-hadoop2.7
+    sudo: yes
+    when: toree_is_installed.stat.exists == False
+  - name: Copy Spark Env File
+    shell: |
+      cp /opt/spark-2.3.1-bin-hadoop2.7/conf/spark-env.sh.template /opt/spark-2.3.1-bin-hadoop2.7/conf/spark-env.sh
+  - name: Write Environment Variables in spark-env.sh
+    blockinfile:
+      dest: /opt/spark-2.3.1-bin-hadoop2.7/conf/spark-env.sh
+      block: |
+        export  SPARK_MASTER_HOME=127.0.0.1
+        export  SPARK_MASTER_IP=127.0.0.1
+        export  SPARK_LOCAL_IP=127.0.0.1
+      backup: yes
+  - name: Check if Mahout is Installed
+    stat:
+      path: /usr/local/mahout-mahout-0.13.1-rc1/spark/target/mahout-spark_2.11-0.13.1.jar
+    register: mahout_is_installed
+  - name: Install Mahout
+    shell: |
+      wget -P /tmp https://github.com/apache/mahout/archive/mahout-0.13.1-rc1.tar.gz
+      tar -zxf /tmp/mahout-0.13.1-rc1.tar.gz -C /tmp
+      bash -lc "cd /tmp/mahout-mahout-0.13.1-rc1 && mvn clean"
+      bash -lc "cd /tmp/mahout-mahout-0.13.1-rc1 && mvn install -Dscala.version=2.11.12 -Dscala.compat.version=2.11 -DskipTests=true"
+      mv /tmp/mahout-mahout-0.13.1-rc1 /usr/local
+      ln -s  /usr/local/mahout-mahout-0.13.1-rc1 /usr/local/mahout
+    sudo: yes
+    when: mahout_is_installed.stat.exists == False
+  - name: Check if SystemML is Installed
+    stat:
+      path: /usr/local/systemml-1.1.0-rc2/target/systemml-1.1.0.jar
+    register: systemml_is_installed
+  - name: Install SystemML
+    shell: |
+      wget -P /tmp https://github.com/apache/systemml/archive/v1.1.0-rc2.tar.gz
+      tar -zxf /tmp/v1.1.0-rc2.tar.gz -C /tmp
+      bash -lc "cd /tmp/systemml-1.1.0-rc2 && mvn clean"
+      bash -lc "cd /tmp/systemml-1.1.0-rc2 && mvn install -DskipTests=true"
+      mv /tmp/systemml-1.1.0-rc2 /usr/local
+      ln -s  /usr/local/systemml-1.1.0-rc2 /usr/local/systemml
+    sudo: yes
+    when: systemml_is_installed.stat.exists == False
+  - name: Install Package for Sparkling Water
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - unzip
+  - name: Check if Sparkling Water is Installed
+    stat:
+      path: /usr/local/sparkling-water-2.3.8/assembly/build/libs/sparkling-water-assembly_2.11-2.3.8-all.jar
+    register: sparklingwater_is_installed
+  - name: Install Sparkling Water
+    shell: |
+      wget -P /tmp http://h2o-release.s3.amazonaws.com/sparkling-water/rel-2.3/8/sparkling-water-2.3.8.zip
+      unzip /tmp/sparkling-water-2.3.8.zip -d /tmp
+      mv /tmp/sparkling-water-2.3.8 /usr/local
+      ln -s  /usr/local/sparkling-water-2.3.8 /usr/local/sparkling-water
+    sudo: yes
+    when: sparklingwater_is_installed.stat.exists == False
+#  - name: Install MLeap
+#    shell: |
+#      bash -lc "cd /tmp && git clone https://github.com/combust/mleap.git"
+#      bash -lc "cd /tmp/mleap && git init"
+#      bash -lc "cd /tmp/mleap && git submodule init"
+#      bash -lc "cd /tmp/mleap && git submodule update"
+#      bash -lc "cd /tmp/mleap && sbt compile"
+#      mv /tmp/mleap /usr/local
+#    sudo: yes
+  - name: Conda Pip Installs
+    shell: |
+      conda create --name test
+      source activate test
+      pip install py4j==0.10.7 --user
+      pip install msgpack --user
+      pip install systemml --user
+      pip install mleap --user
+  - name: Remove Blank Toree Spark Options
+    lineinfile:
+      dest: /usr/local/share/jupyter/kernels/apache_toree_scala/kernel.json
+      regexp: '^.*TOREE_SPARK_OPTS'
+      state: absent
+  - name: Update Toree Spark Options
+    blockinfile:
+      dest: /usr/local/share/jupyter/kernels/apache_toree_scala/kernel.json
+      block: |
+         "__TOREE_SPARK_OPTS__": "--master=local[1] --jars /usr/local/systemml/target/SystemML.jar,/usr/local/mahout/mahout-math-0.13.1.jar,/usr/local/mahout/mahout-math-scala_2.11-0.13.1.jar,/usr/local/mahout/mahout-spark_2.11-0.13.1.jar,/usr/local/sparkling-water/assembly/build/libs/sparkling-water-assembly_2.11-2.3.8-all.jar --packagesml.combust.mleap:mleap-spark_2.11:0.10.0  --conf spark.kryo.referenceTracking=false --conf spark.kryo.registrator=org.apache.mah out.sparkbindings.io.MahoutKryoRegistrator --conf spark.kryoserializer.buffer=32 k --conf spark.kryoserializer.buffer.max=600m --conf spark.serializer=org.apache .spark.serializer.KryoSerializer",
+      backup: yes
+      insertafter: ^.*env
+      state: present
+  - name: Create Jupyter Script
+    shell: |
+      echo "jupyter notebook --ip=* --no-browser &" > /home/ubuntu/jup.sh
+      chmod a+x /home/ubuntu/jup.sh

@@ -1,0 +1,12 @@
+  - name: Check if mvn is installed
+    stat:
+      path: /usr/local/apache-maven-{{ maven_version}}/bin/mvn
+    register: mvn_is_installed
+  - name: Install Maven
+    shell: |
+      wget -P /tmp http://www-us.apache.org/dist/maven/maven-3/{{ maven_version}}/binaries/apache-maven-{{ maven_version}}-bin.tar.gz
+      tar -zxf /tmp/apache-maven-{{ maven_version}}-bin.tar.gz -C /tmp
+      mv /tmp/apache-maven-{{ maven_version}} /usr/local
+      ln -s /usr/local/apache-maven-{{ maven_version}}/bin/mvn /usr/bin/mvn
+    sudo: yes
+    when: mvn_is_installed.stat.exists == False

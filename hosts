@@ -1,0 +1,17 @@
+[master]
+master00 ansible_host=34.228.37.39
+
+[slave]
+slave00 ansible_host=3.85.236.182
+slave01 ansible_host=54.164.155.213
+
+[master:vars]
+ansible_user=ubuntu
+host_key_checking=false
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
+[slave:vars]
+ansible_user=ubuntu
+host_key_checking=false
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+

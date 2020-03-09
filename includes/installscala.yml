@@ -1,0 +1,11 @@
+  - name: Check Scala Installed
+    shell: dpkg --status scala | grep 'install ok installed'
+    register: scala_is_installed
+    failed_when: no
+    changed_when: no
+  - name: Install Scala
+    shell: |
+      wget -P /tmp http://downloads.lightbend.com/scala/{{ scala_version }}/scala-{{ scala_version }}.deb
+      dpkg -i /tmp/scala-{{ scala_version }}.deb
+    when: scala_is_installed.rc == 1
+    sudo: yes

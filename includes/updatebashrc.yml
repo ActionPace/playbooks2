@@ -1,0 +1,16 @@
+  - name: Ansible Insert multiple lines using blockinfile
+    blockinfile:
+      #dest: /etc/bash.bashrc
+      dest: /home/ubuntu/.bashrc
+      block: |
+        export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+        export PATH=$PATH:$JAVA_HOME/bin
+        export SCALA_HOME=/usr/share/scala
+        export PATH=$PATH:$SCALA_HOME/bin
+        export MAVEN_OPTS="-Xmx2g -XX:ReservedCodeCacheSize=512m"
+        export M2_HOME=/usr/local/apache-maven-{{ maven_version }}
+        export SPARK_HOME=/opt/spark-{{ spark_version }}-bin-hadoop2.7
+        export PYTHONPATH=$SPARK_HOME/python/:$SPARK_HOME/python/lib/py4j-0.10.7-src.zip
+        export PATH="/usr/local/anaconda3/bin:$PATH"
+        export SPARK_LOCAL_IP='127.0.0.1'
+      backup: yes
