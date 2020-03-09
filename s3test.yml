@@ -1,0 +1,57 @@
+- hosts: localhost
+  become: true
+  vars:
+    url1: https://archive.apache.org/dist/spark/spark-2.4.0/spark-2.4.0-bin-hadoop2.7.tgz
+  tasks:
+#    - debug:
+#        msg: "Testing {{ aws_access_key }} {{ aws_secret_key }} {{ region }}"
+#        #msg: "Testing"
+
+    - name: Download file from S3 bucket
+      aws_s3:
+        bucket: "{{ aws_bucket }}"
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        #region: "{{ region }}"
+        mode: list
+      register: s3objects
+
+    #- debug:
+    #    msg: "{{ item }}"
+    #  with_items:
+    #    - "{{ s3objects.s3_keys }}"  
+    - set_fact:
+        url1basename: "{{ url1 | basename }}"
+    - name: Simple GET operation
+      aws_s3:
+        bucket: "{{ aws_bucket }}"
+        object: "{{ url1basename }}"
+        dest: /tmp/{{ url1basename }}
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        mode: get
+      when: url1basename in s3objects.s3_keys 
+      register: downloadrc2
+    - name: Download file with checksum url 
+      get_url:
+        url: "{{ url1 }}"
+        dest: /tmp
+      when: url1basename not in s3objects.s3_keys 
+      register: downloadrc
+    - debug:
+        msg: "{{ downloadrc.status_code }}"
+      when: url1basename not in s3objects.s3_keys 
+    - name: Simple PUT operation
+      aws_s3:
+        bucket: "{{ aws_bucket }}"
+        object: "{{ url1basename }}"
+        src: /tmp/{{ url1basename }}
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        mode: put
+      when: url1basename not in s3objects.s3_keys 
+      register: downloadrc2
+    - debug:
+        msg: "{{ downloadrc2 }}"
+      when: url1basename not in s3objects.s3_keys 
+
