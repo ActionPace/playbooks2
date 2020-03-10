@@ -20,5 +20,6 @@
   - include_tasks: includes/updatebashrc.yml
   - include_tasks: includes/updatesparkenv.yml
   - include_tasks: includes/updatesparkdefaultsconf.yml
+  - include_tasks: includes/updatesparkslaveslist.yml
   - include_tasks: includes/updateetchosts.yml
   - include_tasks: includes/sshpasswordless.yml

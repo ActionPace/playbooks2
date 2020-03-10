@@ -1,9 +1,9 @@
 [master]
-master00 ansible_host=3.84.151.97
+master00 ansible_host=54.196.211.176
 
 [slave]
-slave00 ansible_host=54.165.97.72
-slave01 ansible_host=54.172.128.113
+slave00 ansible_host=54.226.250.149
+slave01 ansible_host=34.229.174.170
 
 [master:vars]
 ansible_user=ubuntu

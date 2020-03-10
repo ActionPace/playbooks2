@@ -1,4 +1,4 @@
-- hosts: all
+- hosts: master00
   tasks:
   - name: Update Ubuntu
     shell: |
@@ -21,7 +21,8 @@
     vars:
       packages:
       - x11-common
-      - xserver-common x11-utils
+      - xserver-common 
+      - x11-utils
       - libfontenc1
       - libgl1-mesa-dri
       - libjpeg-turbo8
@@ -38,7 +39,7 @@
     register: tigervnc_is_installed
   - name: Install Tiger Vnc
     shell: |
-      wget -P /tmp https://s3.amazonaws.com/machinelearningfiles/tigervncserver_1.8.0-1ubuntu1_amd64.deb
+      wget -P /tmp https://machinelearningfiles.s3.amazonaws.com/tigervncserver_1.8.0-1ubuntu1_amd64.deb
       bash sudo dpkg -i /tmp/tigervncserver_1.8.0-1ubuntu1_amd64.deb
     sudo: yes
     when: tigervnc_is_installed.stat.exists == False

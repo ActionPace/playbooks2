@@ -1,0 +1,12 @@
+  - name: Copy Spark Slaves List
+    shell: |
+      cp /opt/spark-{{ spark_version }}-bin-hadoop2.7/conf/slaves.template /opt/spark-{{ spark_version }}-bin-hadoop2.7/conf/slaves
+  - name: List Slaves
+    blockinfile:
+      dest: /opt/spark-{{ spark_version }}-bin-hadoop2.7/conf/slaves
+      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item }}"
+      block: |
+        {{ item }}
+    when: "{{ inventory_hostname != item }}"
+    with_items:
+      - "{{ play_hosts }}"
