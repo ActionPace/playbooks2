@@ -1,13 +1,13 @@
 servers:
   master00:
-    public_ip: 34.228.37.39
-    private_ip: 172.30.0.15
+    public_ip: 3.84.151.97
+    private_ip: 172.30.0.79
     group: master
   slave00:
-    public_ip: 3.85.236.182
-    private_ip: 172.30.0.86
+    public_ip: 54.165.97.72
+    private_ip: 172.30.0.192
     group: slave
   slave01:
-    public_ip: 54.164.155.213
-    private_ip: 172.30.0.13
+    public_ip: 54.172.128.113
+    private_ip: 172.30.0.57
     group: slave

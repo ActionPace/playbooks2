@@ -13,12 +13,12 @@
       apt-get -y update
       apt-get -y upgrade
     sudo: yes
-#  - include_tasks: includes/installjava.yml
-#  - include_tasks: includes/installscala.yml
-#  - include_tasks: includes/installmaven.yml
-#  - include_tasks: includes/installspark.yml
-#  - include_tasks: includes/updatebashrc.yml
-#  - include_tasks: includes/updatesparkenv.yml
-#  - include_tasks: includes/updatesparkdefaultsconf.yml
+  - include_tasks: includes/installjava.yml
+  - include_tasks: includes/installscala.yml
+  - include_tasks: includes/installmaven.yml
+  - include_tasks: includes/installspark.yml
+  - include_tasks: includes/updatebashrc.yml
+  - include_tasks: includes/updatesparkenv.yml
+  - include_tasks: includes/updatesparkdefaultsconf.yml
   - include_tasks: includes/updateetchosts.yml
   - include_tasks: includes/sshpasswordless.yml

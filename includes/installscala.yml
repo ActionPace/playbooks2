@@ -5,7 +5,8 @@
     changed_when: no
   - name: Install Scala
     shell: |
-      wget -P /tmp http://downloads.lightbend.com/scala/{{ scala_version }}/scala-{{ scala_version }}.deb
+      #wget -P /tmp http://downloads.lightbend.com/scala/{{ scala_version }}/scala-{{ scala_version }}.deb
+      wget -P /tmp https://{{ aws_bucket }}.s3.amazonaws.com/scala-{{ scala_version }}.deb
       dpkg -i /tmp/scala-{{ scala_version }}.deb
     when: scala_is_installed.rc == 1
     sudo: yes

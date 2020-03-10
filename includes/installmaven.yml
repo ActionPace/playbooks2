@@ -4,7 +4,8 @@
     register: mvn_is_installed
   - name: Install Maven
     shell: |
-      wget -P /tmp http://www-us.apache.org/dist/maven/maven-3/{{ maven_version}}/binaries/apache-maven-{{ maven_version}}-bin.tar.gz
+      #wget -P /tmp http://www-us.apache.org/dist/maven/maven-3/{{ maven_version}}/binaries/apache-maven-{{ maven_version}}-bin.tar.gz
+      wget -P /tmp https://{{ aws_bucket }}.s3.amazonaws.com/apache-maven-{{ maven_version}}-bin.tar.gz
       tar -zxf /tmp/apache-maven-{{ maven_version}}-bin.tar.gz -C /tmp
       mv /tmp/apache-maven-{{ maven_version}} /usr/local
       ln -s /usr/local/apache-maven-{{ maven_version}}/bin/mvn /usr/bin/mvn

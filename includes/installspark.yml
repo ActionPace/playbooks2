@@ -4,7 +4,8 @@
     register: spark_is_installed
   - name: Install Spark
     shell: |
-      wget -P /tmp https://archive.apache.org/dist/spark/spark-{{ spark_version }}/spark-{{ spark_version }}-bin-hadoop2.7.tgz
+      wget -P /tmp https://{{ aws_bucket }}.s3.amazonaws.com/spark-{{ spark_version }}-bin-hadoop2.7.tgz
+      #wget -P /tmp https://archive.apache.org/dist/spark/spark-{{ spark_version }}/spark-{{ spark_version }}-bin-hadoop2.7.tgz
       tar -zxf /tmp/spark-{{ spark_version }}-bin-hadoop2.7.tgz -C /tmp
       mv /tmp/spark-{{ spark_version }}-bin-hadoop2.7 /opt
       ln -s /opt/spark-{{ spark_version }}-bin-hadoop2.7 /opt/spark
