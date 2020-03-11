@@ -1,20 +1,20 @@
-- hosts: master00
+- hosts: slave00
   tasks:
-  - name: Update Ubuntu
-    shell: |
-      apt-get -y update
-      apt-get -y upgrade
-    sudo: yes
+#  - name: Update Ubuntu
+#    shell: |
+#      apt-get -y update
+#      apt-get -y upgrade
+#    sudo: yes
 #  - name: Check if Java is installed
 #    stat:
 #      path: /usr/bin/java
 #    register: java_is_installed
-  - name: Install Java Apt
-    apt:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - openjdk-8-*
+#  - name: Install Java Apt
+#    apt:
+#      name: "{{ packages }}"
+#    vars:
+#      packages:
+#      - openjdk-8-*
   - name: Install Packages for Remote Access
     apt:
       name: "{{ packages }}"
@@ -31,18 +31,18 @@
       - libxfont1
       - libxtst6
       - libglu1-mesa 
+  - name: Check tigervncserver Installed
+    shell: dpkg --status tigervncserver | grep 'install ok installed'
+    register: tigervncserver_is_installed
+    failed_when: no
+    changed_when: no
 
-
-  - name: Check if Tiger Vnc Server is installed
-    stat:
-      path: /tmp/tigervncserver_1.8.0-1ubuntu1_amd64.deb
-    register: tigervnc_is_installed
   - name: Install Tiger Vnc
     shell: |
       wget -P /tmp https://machinelearningfiles.s3.amazonaws.com/tigervncserver_1.8.0-1ubuntu1_amd64.deb
-      bash sudo dpkg -i /tmp/tigervncserver_1.8.0-1ubuntu1_amd64.deb
+      sudo dpkg -i /tmp/tigervncserver_1.8.0-1ubuntu1_amd64.deb
     sudo: yes
-    when: tigervnc_is_installed.stat.exists == False
+    when: tigervncserver_is_installed.rc == 1
 
 
   - name: Install Packages for Remote Access 2
@@ -59,14 +59,15 @@
       - libmp3lame-dev 
       - libpixman-1-dev 
       - libxfixes-dev 
-      - libxrandr-dev nasm
+      - libxrandr-dev 
+      - nasm
       - xserver-xorg-dev
       - xfce4
       - xfce4-goodies
  
   - name: Check if Tiger xrdp is installed
     stat:
-      path: /tmp/xrdp-0.9.6.tar.gz
+      path: /usr/local/bin/xrdp-sesrun
     register: xrdp_is_installed
   - name: Install Xrdp
     shell: |
@@ -81,7 +82,7 @@
 
   - name: Check if Xserver is installed
     stat:
-      path: /tmp/xorgxrdp-0.2.6.tar.gz
+      path: /usr/lib/xorg/modules/libxorgxrdp.so
     register: xserver_is_installed
   - name: Install Xserver
     shell: |

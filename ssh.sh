@@ -1,1 +1,1 @@
-ssh -i ~/.ssh/Ansible1.pem ubuntu@54.196.211.176
+ssh -i ~/.ssh/Ansible1.pem ubuntu@52.72.104.89

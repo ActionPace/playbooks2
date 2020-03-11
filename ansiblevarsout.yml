@@ -2,15 +2,15 @@ master:
   masters:
     - master00
   master00:
-    public_ip: 54.196.211.176
-    private_ip: 172.30.0.124
+    public_ip: 52.72.104.89
+    private_ip: 172.30.0.68
 slave:
   slaves:
     - slave00
     - slave01
   slave00:
-    public_ip: 54.226.250.149
-    private_ip: 172.30.0.250
+    public_ip: 54.167.82.216
+    private_ip: 172.30.0.110
   slave01:
-    public_ip: 34.229.174.170
-    private_ip: 172.30.0.41
+    public_ip: 3.91.249.175
+    private_ip: 172.30.0.95
